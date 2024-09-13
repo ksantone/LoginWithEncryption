@@ -1,6 +1,8 @@
+com/LoginWebApp/AccountSettingsServlet.class
 com/LoginWebApp/DatabaseValidator.class
 com/LoginWebApp/RateLimiter.class
 com/LoginWebApp/RegisterServlet.class
+com/LoginWebApp/ValidationUtil.class
 com/LoginWebApp/LoginServlet.class
 com/LoginWebApp/User.class
 com/LoginWebApp/PasswordUtil.class

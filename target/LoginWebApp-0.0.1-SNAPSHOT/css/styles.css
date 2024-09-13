@@ -66,6 +66,21 @@ input[type="submit"]:hover {
     background-color: #3b79d5;
 }
 
+input.btn-primary {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+input.btn-primary:hover {
+    background-color: #0056b3;
+}
+
 .forgot-password {
     text-align: center;
     margin-top: 10px;
@@ -112,6 +127,21 @@ input[type="submit"]:hover {
     margin-bottom: 15px;
 }
 
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
 /* Button styling for Login and Register */
 .btn {
     background-color: #007bff;
@@ -131,4 +161,10 @@ input[type="submit"]:hover {
 
 .btn:hover {
     background-color: #0056b3;
+}
+
+/* Error message style */
+.error-message {
+    color: red;
+    margin-top: 15px;
 }

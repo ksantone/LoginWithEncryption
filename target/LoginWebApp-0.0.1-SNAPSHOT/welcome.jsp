@@ -1,11 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%
-	if (session.getAttribute("username") != null) {
-	    // Redirect to welcome page if user is already logged in
-	    response.sendRedirect("welcome.jsp");
-	    return;
-	}
+    if (session.getAttribute("username") == null) {
+        System.out.println("Redirecting from welcome.jsp to login.jsp because session username is not set.");
+        response.sendRedirect("login.jsp");
+        return;
+    }
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,11 +17,8 @@
 	    <link rel="stylesheet" href="css/styles.css">
 	</head>
 	<body>
-		<div class="navbar">
-	        <a href="account-settings">Account Settings</a>
-	        <a href="logout">Logout</a>
-	    </div>
+		<%@ include file="navbar.jsp" %>
 	    
-	    <div class="welcome-message">Welcome, ${fullName}!</div>
+	    <div class="welcome-message">Welcome, ${firstName} ${lastName}!</div>
 	</body>
 </html>

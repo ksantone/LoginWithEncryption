@@ -2,47 +2,55 @@ package com.LoginWebApp;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class RateLimiter {
-	protected final Map<String, LoginAttempt> loginAttempts = new HashMap<>();
 	protected static final int MAX_ATTEMPTS = 5;
-	protected static final long BLOCK_TIME = TimeUnit.MINUTES.toMillis(10); // 10 minutes
+	protected static final long BLOCK_TIME = 4 * 60 * 1000; // 4 minutes
+	
+	protected Map<String, Integer> attemptsMap = new ConcurrentHashMap<>();
+	protected Map<String, Long> blockMap = new ConcurrentHashMap<>();
+	
+	protected  String generateKey(String username, String action) {
+        return username + "_" + action;
+    }
 
-    public boolean isBlocked(String key) {
-        if (loginAttempts.containsKey(key)) {
-            LoginAttempt attempt = loginAttempts.get(key);
-            if (attempt.getAttempts() >= MAX_ATTEMPTS) {
-                if (System.currentTimeMillis() - attempt.getLastAttempt() < BLOCK_TIME) {
-                    return true; // Block if within block time
-                } else {
-                    loginAttempts.remove(key); // Remove after block time
-                }
+    public boolean isBlocked(String username, String action) {
+    	String key = generateKey(username, action);
+        if (blockMap.containsKey(key)) {
+            long blockedUntil = blockMap.get(key);
+            if (System.currentTimeMillis() < blockedUntil) {
+                return true;
+            } else {
+                // Unblock if block time has passed
+                blockMap.remove(key);
+                attemptsMap.remove(key);
             }
         }
         return false;
     }
     
-    public String getBlockTimeMessage(String key) {
-        if (loginAttempts.containsKey(key)) {
-            LoginAttempt attempt = loginAttempts.get(key);
-            long remainingBlockTime = BLOCK_TIME - (System.currentTimeMillis() - attempt.getLastAttempt());
-            long remainingMinutes = TimeUnit.MILLISECONDS.toMinutes(remainingBlockTime);
-            long remainingSeconds = TimeUnit.MILLISECONDS.toSeconds(remainingBlockTime) % 60;
-            return "Too many failed attempts. Try again in " + remainingMinutes + " minutes and " + remainingSeconds + " seconds.";
+    public String getBlockTimeMessage(String username, String action) {
+    	String key = generateKey(username, action);
+        long blockedUntil = blockMap.get(key);
+        long minutesLeft = (blockedUntil - System.currentTimeMillis()) / 60000;
+        return "You are blocked for another " + minutesLeft + " minutes.";
+    }
+
+    public void loginFailed(String username, String action) {
+    	String key = generateKey(username, action);
+        attemptsMap.put(key, attemptsMap.getOrDefault(key, 0) + 1);
+
+        if (attemptsMap.get(key) >= MAX_ATTEMPTS) {
+            blockMap.put(key, System.currentTimeMillis() + BLOCK_TIME);
         }
-        return "";
     }
 
-    public void loginFailed(String key) {
-        LoginAttempt attempt = loginAttempts.getOrDefault(key, new LoginAttempt());
-        attempt.setAttempts(attempt.getAttempts() + 1);
-        attempt.setLastAttempt(System.currentTimeMillis());
-        loginAttempts.put(key, attempt);
-    }
-
-    public void loginSucceeded(String key) {
-        loginAttempts.remove(key);
+    public void loginSucceeded(String username, String action) {
+        String key = generateKey(username, action);
+        attemptsMap.remove(key);
+        blockMap.remove(key);
     }
 
     protected static class LoginAttempt {

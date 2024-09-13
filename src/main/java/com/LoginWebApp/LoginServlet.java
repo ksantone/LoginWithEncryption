@@ -24,10 +24,18 @@ public class LoginServlet extends HttpServlet {
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
 		
+		// Validate the input
+		String validationError = ValidationUtil.validateLoginInput(username, password);
+		if (validationError != null) {
+			request.setAttribute("errorMessage", validationError);
+			request.getRequestDispatcher("login.jsp").forward(request, response);
+			return;
+		}
+		
 		// Check if the user is rate-limited
-	    if (rateLimiter.isBlocked(username)) {
+	    if (rateLimiter.isBlocked(username, "login")) {
 	        // Set the error message
-	        String errorMessage = rateLimiter.getBlockTimeMessage(username);
+	        String errorMessage = rateLimiter.getBlockTimeMessage(username, "login");
 	        request.setAttribute("errorMessage", errorMessage);
 
 	        // Forward the request to the login page with the error message
@@ -40,22 +48,25 @@ public class LoginServlet extends HttpServlet {
 
 		if (user != null && PasswordUtil.checkPassword(password, user.getPassword())) {
 			// Successful login, reset attempts
-	        rateLimiter.loginSucceeded(username);
+	        rateLimiter.loginSucceeded(username, "login");
 			
 			// Retrieve additional data from the database
-			String fullName = user.getFullName();
+			String firstName = user.getFirstName();
+			String lastName = user.getLastName();
 
 			// Create session and set the user as logged in
 			HttpSession session = request.getSession();
 			session.setAttribute("username", username);
-			session.setAttribute("fullName", fullName);
+			session.setAttribute("firstName", firstName);
+			session.setAttribute("lastName", lastName);
 
 			// Set user data in the request scope and forward to the welcome page
-			request.setAttribute("fullName", fullName);
+			request.setAttribute("firstName", firstName);
+			request.setAttribute("lastName", lastName);
 			request.getRequestDispatcher("welcome.jsp").forward(request, response);
 		} else {
 			// Failed login, increase attempts
-	        rateLimiter.loginFailed(username);
+	        rateLimiter.loginFailed(username, "login");
 			
 			// Set an error message in the request scope and forward back to the login page
 			request.setAttribute("errorMessage", "Invalid username or password");

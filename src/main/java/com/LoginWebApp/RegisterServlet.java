@@ -14,7 +14,16 @@ public class RegisterServlet extends HttpServlet {
 			throws ServletException, IOException {
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
-		String fullName = request.getParameter("fullName");
+		String firstName = request.getParameter("firstName");
+		String lastName = request.getParameter("lastName");
+		
+		// Validate user input
+		String validationError = ValidationUtil.validateUserDetails(username, firstName, lastName, password);
+		if (validationError != null) {
+			request.setAttribute("errorMessage", validationError);
+			request.getRequestDispatcher("register.jsp").forward(request, response);
+			return;
+		}
 
 		// Check if the username is already taken
 		User existingUser = DatabaseValidator.getUserByUsername(username);
@@ -28,7 +37,7 @@ public class RegisterServlet extends HttpServlet {
 		String hashedPassword = PasswordUtil.hashPassword(password);
 
 		// Add the new user to the database
-		boolean isRegistered = DatabaseValidator.addNewUser(username, hashedPassword, fullName);
+		boolean isRegistered = DatabaseValidator.addNewUser(username, hashedPassword, firstName, lastName);
 		if (isRegistered) {
 			response.sendRedirect("login.jsp");
 		} else {

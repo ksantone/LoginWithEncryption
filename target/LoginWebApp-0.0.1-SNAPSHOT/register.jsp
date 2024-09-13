@@ -22,8 +22,13 @@
 	            </div>
 	            
 	            <div class="form-group">
-	                <label for="fullName">Full Name:</label>
-	                <input type="text" name="fullName" required/>
+	                <label for="firstName">First Name:</label>
+	                <input type="text" name="firstName" required/>
+	            </div>
+	            
+	            <div class="form-group">
+	                <label for="lastName">Last Name:</label>
+	                <input type="text" name="lastName" required/>
 	            </div>
 	            
 	            <input type="submit" class="btn" value="Register" />

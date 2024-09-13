@@ -3,12 +3,14 @@ package com.LoginWebApp;
 public class User {
     protected String username;
     protected String password;
-    protected String fullName;
+    protected String firstName;
+    protected String lastName;
 
-    public User(String username, String password, String fullName) {
+    public User(String username, String password, String firstName, String lastName) {
         this.username = username;
         this.password = password;
-        this.fullName = fullName;
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
     public String getUsername() {
@@ -19,7 +21,11 @@ public class User {
         return password;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getFirstName() {
+        return firstName;
+    }
+    
+    public String getLastName() {
+        return lastName;
     }
 }

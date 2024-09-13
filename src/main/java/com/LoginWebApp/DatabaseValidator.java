@@ -33,7 +33,7 @@ public class DatabaseValidator {
     }
     
     // Method to add a new user to the database
-    public static boolean addNewUser(String username, String password, String fullName) {
+    public static boolean addNewUser(String username, String password, String firstName, String lastName) {
         try {
         	String environment = System.getenv("ENVIRONMENT"); // Set ENVIRONMENT as local or aws in your environment variables
             
@@ -48,21 +48,19 @@ public class DatabaseValidator {
             Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
             
             System.out.println("Just connected in add new user.");
-
-            String query = "INSERT INTO users (username, password, full_name) VALUES (?, ?, ?)";
+        	
+            String query = "INSERT INTO users (username, password, first_name, last_name) VALUES (?, ?, ?, ?)";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, username);
             statement.setString(2, password);  // Hashed password
-            statement.setString(3, fullName);
-
-            int rowsInserted = statement.executeUpdate();
+            statement.setString(3, firstName);
+            statement.setString(4, lastName);
             
-            System.out.println("Rows inserted: " + rowsInserted);
-            // Clean up
+            int rowsInserted = statement.executeUpdate();
             statement.close();
             connection.close();
 
-            return rowsInserted > 0;  // Return true if the insertion was successful
+            return rowsInserted > 0;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -89,7 +87,7 @@ public class DatabaseValidator {
             System.out.println("Connected successfully!");
 
             // SQL query to fetch user details
-            String query = "SELECT username, password, full_name FROM users WHERE username = ?";
+            String query = "SELECT username, password, first_name, last_name FROM users WHERE username = ?";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, username);
 
@@ -100,9 +98,10 @@ public class DatabaseValidator {
             if (resultSet.next()) {
                 String retrievedUsername = resultSet.getString("username");
                 String retrievedPassword = resultSet.getString("password");
-                String fullName = resultSet.getString("full_name");
+                String firstName = resultSet.getString("first_name");
+                String lastName = resultSet.getString("last_name");
 
-                user = new User(retrievedUsername, retrievedPassword, fullName);
+                return new User(retrievedUsername, retrievedPassword, firstName, lastName);
             }
 
             // Closing resources
@@ -116,4 +115,47 @@ public class DatabaseValidator {
 
         return user;
     }
+    
+    public static boolean updateUserDetails(String username, String newFirstName, String newLastName) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+
+        try {
+            // Get the database connection
+            String environment = System.getenv("ENVIRONMENT");
+            String dbUrl = properties.getProperty(environment + ".db.url");
+            String dbUsername = properties.getProperty(environment + ".db.username");
+            String dbPassword = properties.getProperty(environment + ".db.password");
+
+            connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+
+            // Construct the SQL query to update user details
+            String query = "UPDATE users SET first_name = ?, last_name = ? WHERE username = ?";
+
+            // Prepare the SQL statement
+            statement = connection.prepareStatement(query);
+            statement.setString(1, newFirstName);
+            statement.setString(2, newLastName);
+            statement.setString(3, username);
+
+            // Execute the update
+            int rowsUpdated = statement.executeUpdate();
+            
+            // Return true if at least one row was updated, meaning the update was successful
+            return rowsUpdated > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            // Clean up resources
+            try {
+                if (statement != null) statement.close();
+                if (connection != null) connection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

@@ -2,7 +2,7 @@
     pageEncoding="UTF-8"%>
 <%
     if (session.getAttribute("username") != null) {
-        // Redirect to welcome page if user is already logged in
+        System.out.println("Redirecting from login.jsp to welcome.jsp because session username is set.");
         response.sendRedirect("welcome.jsp");
         return;
     }
